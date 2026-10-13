@@ -2,25 +2,6 @@
 
 Dashboard meteorológico responsivo em HTML, CSS e JavaScript puro. Usa APIs públicas da Open-Meteo e dados do NOAA Climate Prediction Center (NOAA CPC), sem chave de API.
 
-## Rodar localmente
-
-Como o projeto usa `fetch`, rode por um servidor HTTP local (não abra `index.html` diretamente).
-
-### Opção 1 — VS Code
-Instale a extensão **Live Server**, clique com o botão direito em `index.html` e selecione **Open with Live Server**.
-
-### Opção 2 — Python
-Na pasta do projeto, execute:
-
-```bash
-python -m http.server 5500
-```
-
-Abra `http://localhost:5500`.
-
-## Deploy na Netlify, Vercel ou GitHub Pages
-
-O front-end é estático e não precisa de build command. O projeto inclui uma função serverless pequena para consultar a série RONI da NOAA sem depender de CORS: `api/enso.js` para Vercel e `netlify/functions/enso.js` + `netlify.toml` para Netlify. Ao publicar em um desses provedores, mantenha esses arquivos e a configuração juntos. No servidor local, o site tenta usar as funções e depois tenta consultar a NOAA diretamente; se o CORS bloquear, o cartão informa a indisponibilidade e mantém o link oficial.
 
 ## Recursos
 
@@ -54,4 +35,4 @@ A anomalia mostra se a máxima prevista está acima ou abaixo dessa referência 
 - Os dados dependem de internet e disponibilidade dos serviços externos.
 - O índice NOAA é carregado do arquivo oficial por uma função serverless no deploy. Em servidor local sem funções, a consulta direta pode ser bloqueada por CORS; nesse caso, o site mostrará um aviso e manterá o link para a fonte oficial.
 - O mapa depende do carregamento da biblioteca Leaflet e dos tiles do OpenStreetMap; se não carregarem, o ranking textual ainda pode ser usado.
-- Consulte os termos da Open-Meteo para condições de uso e atribuição, especialmente em aplicações comerciais.
+

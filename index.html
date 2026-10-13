@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#d8e8ef" />
+  <meta name="description" content="Clima em tempo real, previsão e contexto climático com dados da Open-Meteo." />
+  <title>céu — clima com contexto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="weather-effects" aria-hidden="true"><div class="sun-glow"></div><div class="rain-layer"></div></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Céu, página inicial"><span class="brand-mark">c.</span><span>céu<span class="brand-dot">.</span></span></a>
+      <div class="topbar-right">
+        <span class="live-dot"></span><span class="live-label">DADOS AO VIVO</span>
+        <button id="themeToggle" class="icon-button" aria-label="Alternar tema" title="Alternar tema">◐</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> O TEMPO, COM CONTEXTO</p>
+        <h1>Entenda o céu<br><em>da sua cidade.</em></h1>
+        <p class="intro">Condições agora, o que vem pela frente e como tudo isso se compara ao clima habitual.</p>
+      </div>
+      <div class="search-wrap">
+        <label class="search-box" for="citySearch"><span class="search-icon">⌕</span><input id="citySearch" type="search" placeholder="Buscar cidade..." autocomplete="off" value="Divinópolis" /><kbd>↵</kbd></label>
+        <div id="suggestions" class="suggestions hidden"></div>
+        <div class="search-foot"><span id="locationLabel">Minas Gerais, Brasil</span><button id="locateBtn" class="text-button">Usar minha localização ↗</button></div>
+      </div>
+    </section>
+
+    <section class="current-grid">
+      <article class="current-card glass">
+        <div class="current-top"><div><p class="eyebrow muted">AGORA EM <span id="cityUpper">DIVINÓPOLIS</span></p><h2 id="conditionText">Carregando o céu...</h2></div><div id="weatherGlyph" class="weather-glyph" aria-hidden="true">☼</div></div>
+        <div class="temperature-row"><span id="currentTemp" class="temperature skeleton-text">--</span><span class="degree">°</span><div class="feels-like">Sensação<br><strong id="feelsLike">--°</strong></div></div>
+        <div class="current-bottom">
+          <div><span class="metric-label">MÍN / MÁX</span><strong id="todayRange">--° / --°</strong></div>
+          <div><span class="metric-label">VENTO</span><strong id="windValue">-- km/h</strong></div>
+          <div><span class="metric-label">UMIDADE</span><strong id="humidityValue">--%</strong></div>
+          <div><span class="metric-label">UV MÁX.</span><strong id="uvValue">--</strong></div>
+        </div>
+      </article>
+      <article class="sun-card glass">
+        <div class="card-heading"><div><p class="eyebrow muted">LUZ DO DIA</p><h3>O ritmo do sol</h3></div><span id="dayLength" class="tiny-pill">—</span></div>
+        <div class="sun-path"><div class="sun-track"></div><div class="sun-arc"></div><div id="sunMarker" class="sun-marker">☼</div><span class="sun-horizon left"></span><span class="sun-horizon right"></span></div>
+        <div class="sun-times"><div><span class="metric-label">NASCER DO SOL</span><strong id="sunrise">--:--</strong></div><div class="sunset"><span class="metric-label">PÔR DO SOL</span><strong id="sunset">--:--</strong></div></div>
+        <p class="sun-note" id="sunNote">Atualizando a posição do sol…</p>
+      </article>
+    </section>
+
+    <section class="section-block">
+      <div class="section-heading"><div><p class="eyebrow muted">PRÓXIMAS HORAS</p><h2>O dia em uma curva</h2></div><span class="section-aside">TEMPERATURA · °C</span></div>
+      <article class="chart-card glass">
+        <div class="chart-summary"><strong id="chartSummary">A temperatura ao longo do dia</strong><span id="chartRange">—</span></div>
+        <div class="chart-wrap"><svg id="tempChart" viewBox="0 0 760 210" role="img" aria-label="Gráfico de temperatura nas próximas horas"></svg><div id="chartTooltip" class="chart-tooltip hidden"></div></div>
+        <div id="hourLabels" class="hour-labels"></div>
+      </article>
+    </section>
+
+    <section class="section-block">
+      <div class="section-heading"><div><p class="eyebrow muted">OLHANDO ADIANTE</p><h2>Próximos 7 dias</h2></div><span class="section-aside">AMPLITUDE TÉRMICA</span></div>
+      <div id="forecastGrid" class="forecast-grid">
+        <div class="forecast-skeleton"></div><div class="forecast-skeleton"></div><div class="forecast-skeleton"></div><div class="forecast-skeleton"></div><div class="forecast-skeleton"></div><div class="forecast-skeleton"></div><div class="forecast-skeleton"></div>
+      </div>
+    </section>
+
+    <section class="section-block climate-section">
+      <div class="section-heading"><div><p class="eyebrow muted">CLIMA EM PERSPECTIVA</p><h2>O efeito El Niño</h2></div><span class="section-aside">ANOMALIA CLIMÁTICA</span></div>
+      <div class="climate-grid">
+        <article class="climate-card glass">
+          <div class="climate-intro"><div class="climate-icon">↗</div><div><p class="eyebrow muted">TEMPERATURA</p><h3 id="anomalyTemp">Calculando desvio…</h3></div></div>
+          <p id="anomalyText">Comparando a previsão atual com a referência histórica para esta época do ano.</p>
+          <div class="anomaly-track"><span id="anomalyBar"></span></div>
+          <div class="track-labels"><span>Mais frio que a referência</span><span>Mais quente</span></div>
+        </article>
+        <article class="climate-card glass rain-card">
+          <div class="climate-intro"><div class="climate-icon rain-icon">⌁</div><div><p class="eyebrow muted">PRECIPITAÇÃO</p><h3 id="rainAnomaly">Analisando chuva…</h3></div></div>
+          <p id="rainText">A chuva prevista será contextualizada com a climatologia disponível.</p>
+          <div class="rain-stats"><div><span class="metric-label">CHUVA PREVISTA (7 DIAS)</span><strong id="rainTotal">— mm</strong></div><div><span class="metric-label">DIAS COM CHUVA</span><strong id="rainDays">—</strong></div></div>
+        </article>
+      </div>
+      <p class="disclaimer">Nota: anomalias são estimativas de contexto, não uma atribuição direta ao El Niño. A comparação usa a climatologia histórica disponível da Open-Meteo; padrões regionais e variabilidade natural também influenciam o tempo.</p>
+    </section>
+
+    <section class="section-block enso-section" id="global-climate">
+      <div class="section-heading"><div><p class="eyebrow muted">MONITOR GLOBAL</p><h2>O planeta sob observação</h2></div><span class="section-aside">DADOS GLOBAIS · ATUALIZÁVEIS</span></div>
+      <article class="enso-status glass">
+        <div class="enso-status-icon" aria-hidden="true">≈</div>
+        <div class="enso-status-copy"><p class="eyebrow muted">EL NIÑO / LA NIÑA · NOAA CPC</p><h3 id="ensoPhase">Consultando o índice climático…</h3><p id="ensoSummary">Buscando o índice oceânico mais recente e o boletim oficial do ENSO.</p><span id="ensoUpdated" class="enso-updated">Fonte: NOAA Climate Prediction Center</span></div>
+        <div class="enso-index"><span class="metric-label">RONI MAIS RECENTE</span><strong id="roniValue">—</strong><span id="roniSeason">Aguardando dados oficiais</span><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noreferrer">Boletim oficial NOAA ↗</a><a href="https://www.cpc.ncep.noaa.gov/data/indices/RONI.ascii.txt" target="_blank" rel="noreferrer">Abrir série RONI ↗</a></div>
+      </article>
+      <div class="section-heading world-heading"><div><p class="eyebrow muted">RADAR DE CALOR</p><h2>Onde está mais quente no mundo?</h2></div><span class="section-aside">AMOSTRA DE CIDADES</span></div>
+      <p class="world-intro">Compare a temperatura atual em cidades de diferentes regiões e veja onde a máxima prevista está mais acima da referência histórica. A seleção é representativa, não cobre todos os pontos do planeta.</p>
+      <div class="world-controls"><div class="world-legend"><span><i class="legend-dot hot"></i>Mais quente que a referência</span><span><i class="legend-dot cool"></i>Mais frio que a referência</span></div><div class="world-sort" role="group" aria-label="Ordenar cidades"><button id="sortHot" class="sort-button active" type="button">Maior temperatura</button><button id="sortAnomaly" class="sort-button" type="button">Maior anomalia</button></div></div>
+      <div class="world-layout"><article class="world-map-card glass"><div class="map-topline"><strong>Mapa de temperaturas</strong><span id="mapStatus">Carregando cidades…</span></div><div id="worldMap" role="application" aria-label="Mapa mundial interativo com temperaturas por cidade"></div><p class="map-caption">Selecione um marcador para ver os dados da cidade. As cores representam a anomalia da máxima prevista, não a temperatura absoluta.</p></article><article class="world-ranking glass"><div class="ranking-heading"><div><p class="eyebrow muted">RANKING AO VIVO</p><h3 id="rankingTitle">Temperaturas mais altas</h3></div><span id="rankingCount" class="tiny-pill">12 cidades</span></div><div id="worldRanking" class="world-ranking-list"><div class="ranking-loading">Consultando dados meteorológicos globais…</div></div></article></div>
+      <div class="world-footnotes"><p><strong>Como ler:</strong> “Agora” é a temperatura atual fornecida pela Open-Meteo. “Anomalia” compara a máxima prevista para hoje com a média das máximas diárias de todo o mês correspondente entre 1991 e 2020, calculada com dados históricos ERA5. Essa referência mensal não é uma previsão nem prova de causalidade.</p><p><strong>El Niño e calor:</strong> o ENSO altera probabilidades de padrões regionais, mas ondas de calor locais também dependem da estação, circulação atmosférica, umidade, urbanização e aquecimento global. A anomalia exibida é meteorológica; não é uma estimativa da parcela causada pelo El Niño.</p></div>
+    </section>
+
+    <section class="section-block compare-section">
+      <div class="section-heading"><div><p class="eyebrow muted">DOIS CÉUS, LADO A LADO</p><h2>Compare cidades</h2></div><span class="section-aside">OPCIONAL</span></div>
+      <div class="compare-card glass">
+        <div class="compare-main"><div class="compare-city"><span class="compare-label">SUA CIDADE</span><strong id="compareCityA">Divinópolis</strong><span id="compareDescA">Carregando…</span></div><div class="compare-temp"><span id="compareTempA">--°</span><small id="compareMetaA">—</small></div></div>
+        <div class="compare-divider"><span>VS</span></div>
+        <div class="compare-main second"><div class="compare-city"><label class="compare-label" for="compareSearch">OUTRA CIDADE</label><input id="compareSearch" class="compare-input" type="search" placeholder="Ex.: São Paulo" autocomplete="off"><div id="compareSuggestions" class="suggestions hidden"></div><span id="compareDescB">Busque uma cidade para comparar</span></div><div class="compare-temp"><span id="compareTempB">—°</span><small id="compareMetaB">Temperatura atual</small></div></div>
+      </div>
+    </section>
+
+    <footer class="footer"><a class="brand footer-brand" href="#"><span class="brand-mark">c.</span><span>céu<span class="brand-dot">.</span></span></a><span>Feito para olhar o tempo com outros olhos.</span><span>Dados meteorológicos: Open-Meteo · ENSO: NOAA CPC</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
